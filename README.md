@@ -4,5 +4,6 @@
 
 # Wiki
 
-Home: 
+首页: [Home](https://github.com/huangfude/facenet_ZH/blob/master/Wiki/Home.md)
 
+分类器训练：Classifier training of inception resnet v1
