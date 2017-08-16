@@ -1,6 +1,9 @@
-# inception resnet v1 模型的分类器训练 
+# Triplet loss 训练
 
-本页描述如何训练[Inception-Resnet-v1](https://arxiv.org/abs/1602.07261) 模型成一个分类器，即不使用在[Facenet](http://arxiv.org/abs/1503.03832) 论文中描述的Triplet Loss。[如这](http://www.robots.ox.ac.uk/%7Evgg/publications/2015/Parkhi15/parkhi15.pdf)所述，作为分类器的训练使训练变得更容易、更快。Facenet论文也使用Inception体系结构的non-ResNet版。在用CASIA/Facescrub数据集训练时，这些网络似乎很困难去训练并且不太集中。没有正规使用训练集时，会有相当大的误差，意味着该模型不能过度使用。使用Inception-Resnet-v1的例子解决了聚合问题并且无论是看准确性和验证率，结果明显提升在LFW的性能（VAL@FAR=10^-3）。 
+本页描述如何用Triplet Loss训练Inception-Resnet-v1模型。必须指出训练triplet loss比训练softmax复杂。但是训练集非常大（超过100000），softmax 本身就会变得很大，而triplet loss还能很好地运行。需要注意的是，本指南决不包含如何使用triplet loss来训练模型的最终配方，而应被视为正在进行中的项目。
+
+训练更好性能的模型，请参考 [Classifier training of Inception-ResNet-v1](https://github.com/davidsandberg/facenet/wiki/Classifier-training-of-inception-resnet-v1.md)
+
 
 # 1、安装Tensorflow
 
@@ -62,30 +65,15 @@ Aaron_Peirsol
 
 # 5、开始分类器训练
 
-运行train_softmax.py开始训练，命令如下：
+运行train_tripletloss.py开始训练，命令如下：
 
-> python src/train_softmax.py --logs_base_dir ~/logs/facenet/ --models_base_dir ~/models/facenet/ --data_dir ~/datasets/casia/casia_maxpy_mtcnnalign_182 --image_size 160 --model_def models.inception_resnet_v1 --lfw_dir ~/datasets/lfw/lfw_mtcnnalign_160 --optimizer RMSPROP --learning_rate -1 --max_nrof_epochs 80 --keep_probability 0.8 --random_crop --random_flip --learning_rate_schedule_file data/learning_rate_schedule_classifier_casia.txt --weight_decay 5e-5 --center_loss_factor 1e-2 --center_loss_alfa 0.9
+> python src/train_tripletloss.py --logs_base_dir ~/logs/facenet/ --models_base_dir ~/models/facenet/ --data_dir ~/datasets/casia/casia_maxpy_mtcnnalign_182_160 --image_size 160 --model_def models.inception_resnet_v1 --lfw_dir ~/datasets/lfw/lfw_mtcnnalign_160 --optimizer RMSPROP --learning_rate 0.01 --weight_decay 1e-4 --max_nrof_epochs 500
 
 当训练开始时，为训练session在log_base_dir 和 models_base_dir 目录下创建格式为yyyymmdd-hhmm的子目录。参数 data_dir 用于指定训练数据集的位置。需要注意的是，可以使用多个数据集的联合使用冒号分隔路径。 最后，对推理网络的描述是由 model_def 参数确定。在上面的例子中，models.inception_resnet_v1中的模型指向在models包中的inception_resnet_v1模块。该模块必须定义一个 inference(images, ...) 函数，参数images是输入图像的占位符(在Inception-ResNet-v1例子中尺寸为<?,160,160,3>)，并返回一个 embeddings 变量的引用。
 
 如果参数 lfw_dir 设置为指向的LFW数据集的基本目录，该模型已经在LFW上被评估1000批次。如何评估存在的LFW模型，请参考[Validate-on-LFW](https://github.com/davidsandberg/facenet/wiki/Validate-on-LFW) 页面。如果期望不评估LFW在训练期间，可以去掉 lfw_dir 参数。但是，请注意，这里使用LFW数据应该被排列在相同的训练数据集。
 
-达到max_nrof_epochs值时训练停止，本例设置为80次训练次数。Nvidia Pascal Titan X GPU，tensorflow R1.0，CUDA 8，cudnn 5.1.5和inception-resnet-v1模型，大约需要12小时。
-
-为了提高最终模型的性能，当训练开始聚合时，学习率降低了10倍。通过参数 learning_rate_schedule_file 在一个文本文件中定义学习率任务安排同时设置参数learning_rate的负值。例如在项目[data/learning_rate_schedule_classifier_casia.txt](https://github.com/davidsandberg/facenet/blob/master/data/learning_rate_schedule_classifier_casia.txt) 中的简单使用，像这样：
-
-<pre>
-# Learning rate schedule
-# Maps an epoch number to a learning rate
-0:  0.1
-65: 0.01
-77: 0.001
-1000: 0.0001
-</pre>
-
-在这里，第一列是编号，第二列是学习率，这意味着当编号在65…76的范围内时，学习率设置为0.01。
-
-# 6、运行TensorBoard（可选）
+# 6、运行TensorBoard
 
 用[TensorBoard](https://www.tensorflow.org/how_tos/summaries_and_tensorboard/#launching-tensorboard) 能监控训练FaceNet的学习过程。运行命令开始TensorBoard：
 
@@ -93,10 +81,3 @@ Aaron_Peirsol
 
 接着就可以用浏览器访问了：
 http://localhost:6006/
-
-# 7、绘制学习曲线
-
-如果使用在LFW数据集的评估训练是将产生一个包含学习曲线的文本文件（每次的精度和验证率）。此文件可以在日志目录中找到，并可以轻松地绘制模型性能和训练步骤。Matlab脚本绘制下面的学习曲线，可以看[这里](https://github.com/davidsandberg/facenet/blob/master/util/plot_learning_curves.m)。
-
-![LFW精度](https://github.com/davidsandberg/facenet/wiki/lfw_accuracy_20161031_203301.png)
-![LFW验证率](https://github.com/davidsandberg/facenet/wiki/lfw_valrate_20161031_203301.png)
