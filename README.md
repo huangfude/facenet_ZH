@@ -11,3 +11,7 @@
 用自己图片训练分类器：[Train a classifier on own images](https://github.com/huangfude/facenet_ZH/blob/master/Wiki/Train%20a%20classifier%20on%20own%20images.md)
 
 Triplet loss 训练：[Triplet loss training](https://github.com/huangfude/facenet_ZH/blob/master/Wiki/Triplet%20loss%20training.md)
+
+LFW 验证：[Validate on LFW](https://github.com/huangfude/facenet_ZH/blob/master/Wiki/Validate%20on%20LFW.md)
+
+变分自编码器：[Variational autoencoder](https://github.com/huangfude/facenet_ZH/blob/master/Wiki/Variational%20autoencoder.md)

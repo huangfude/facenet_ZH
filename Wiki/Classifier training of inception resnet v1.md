@@ -1,6 +1,6 @@
 # inception resnet v1 模型的分类器训练 
 
-本页描述如何训练[Inception-Resnet-v1](https://arxiv.org/abs/1602.07261) 模型成一个分类器，即不使用在[Facenet](http://arxiv.org/abs/1503.03832) 论文中描述的Triplet Loss。[如这](http://www.robots.ox.ac.uk/%7Evgg/publications/2015/Parkhi15/parkhi15.pdf)所述，作为分类器的训练使训练变得更容易、更快。Facenet论文也使用Inception体系结构的non-ResNet版。在用CASIA/Facescrub数据集训练时，这些网络似乎很困难去训练并且不太集中。没有正规使用训练集时，会有相当大的误差，意味着该模型不能过度使用。使用Inception-Resnet-v1的例子解决了聚合问题并且无论是看准确性和验证率，结果明显提升在LFW的性能（VAL@FAR=10^-3）。 
+本页描述如何训练[Inception-Resnet-v1](https://arxiv.org/abs/1602.07261) 模型成一个分类器，即不使用在[Facenet](http://arxiv.org/abs/1503.03832) 论文中描述的Triplet Loss。[如这](http://www.robots.ox.ac.uk/%7Evgg/publications/2015/Parkhi15/parkhi15.pdf)所述，作为分类器的训练使训练变得更容易、更快。Facenet论文也使用Inception体系结构的non-ResNet版。在用CASIA/Facescrub数据集训练时，这些网络似乎很困难去训练并且不太集中。没有正规使用训练集时，会有相当大的误差，意味着该模型不能过度使用。使用Inception-Resnet-v1的例子解决了收敛问题并且无论是看准确性和验证率，结果明显提升在LFW的性能（VAL@FAR=10^-3）。 
 
 # 1、安装Tensorflow
 
@@ -72,7 +72,7 @@ Aaron_Peirsol
 
 达到max_nrof_epochs值时训练停止，本例设置为80次训练次数。Nvidia Pascal Titan X GPU，tensorflow R1.0，CUDA 8，cudnn 5.1.5和inception-resnet-v1模型，大约需要12小时。
 
-为了提高最终模型的性能，当训练开始聚合时，学习率降低了10倍。通过参数 learning_rate_schedule_file 在一个文本文件中定义学习率任务安排同时设置参数learning_rate的负值。例如在项目[data/learning_rate_schedule_classifier_casia.txt](https://github.com/davidsandberg/facenet/blob/master/data/learning_rate_schedule_classifier_casia.txt) 中的简单使用，像这样：
+为了提高最终模型的性能，当训练开始收敛时，学习率降低了10倍。通过参数 learning_rate_schedule_file 在一个文本文件中定义学习率任务安排同时设置参数learning_rate的负值。例如在项目[data/learning_rate_schedule_classifier_casia.txt](https://github.com/davidsandberg/facenet/blob/master/data/learning_rate_schedule_classifier_casia.txt) 中的简单使用，像这样：
 
 <pre>
 # Learning rate schedule
